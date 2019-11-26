@@ -1,0 +1,273 @@
+<template>
+  <b-container class="pt-3 px-5">
+    <b-card style="border-style: none;">
+      <b-row no-gutters class="justify-content-center">
+        <b-col md="auto" sm="12">
+          <a href=" #">
+            <!-- <cld-image publicId="mypic" /> -->
+            <b-img
+              @click="openWidget()"
+              v-if="!uploadED"
+              class="mx-auto"
+              style="max-height:550px;"
+              fluid
+              src="~/assets/img/default.png"
+            />
+            <b-img
+              id="text-img"
+              class="mx-auto"
+              style="max-height:550px;"
+              v-if="uploadED"
+              :src="imgUrl"
+            ></b-img>
+            <!-- <cld-image   v-if="uploadED" publicId="mypic" /> -->
+          </a>
+          <!-- {{showData}}
+          {{values}}-->
+        </b-col>
+      </b-row>
+      <br />
+      <b-progress block :value="values" :max="1" show-progress></b-progress>
+      <br />
+      <b-row>
+        <b-col md="6" sm="12" class="mb-sm-2">
+          <b-button
+            variant="success"
+            size="lg"
+            :disabled="!uploadED"
+            block
+            v-on:click="recognizeID"
+          >สเเกนรหัสนักศึกษา</b-button>
+        </b-col>
+        <b-col md="6" sm="12">
+          <b-button
+            class
+            variant="info"
+            size="lg"
+            block
+            :disabled="!uploadED"
+            v-on:click="recognizeData"
+          >สเเกนข้อมูลบัตรทั้งหมด</b-button>
+        </b-col>
+        <!-- <b-col>
+          <b-button  variant="warning" size="lg" block v-on:click="recognizeID">สเเกนรหัสนักศึกษา</b-button>
+        </b-col>-->
+      </b-row>
+    </b-card>
+    <b-card v-if="uploadED">
+      <div>
+        <b-tabs content-class="mt-3" fill pills>
+          <b-tab title="ข้อมูลทั้งหมดที่สเเกนได้" active>
+            <p>{{jsonData}}</p>
+          </b-tab>
+          <b-tab title="รหัสนักศึกษา">
+            <p>I'm the second tab</p>
+          </b-tab>
+          <b-tab title="Very, very long title">
+            <p>{{stdId}}</p>
+          </b-tab>
+        </b-tabs>
+      </div>
+    </b-card>
+  </b-container>
+</template>
+
+<script>
+/* eslint-disable */
+import {
+  createWorker,
+  PSM,
+  OEM,
+  OEM_TESSERACT_LSTM_COMBINED,
+  PSM_AUTO_ONLY,
+  OEM_LSTM_ONLY,
+  OEM_TESSERACT_ONLY,
+  PSM_SINGLE_BLOCK_VERT_TEXT,
+  PSM_SINGLE_LINE,
+  PSM_RAW_LINE,
+  PSM_AUTO_OSD,
+  PSM_SPARSE_TEXT_OSD
+} from "tesseract.js";
+import util from "~/controller/ocr";
+let getVa = 0;
+const worker = createWorker({
+  logger: m => {
+    {
+      {
+        util.setValue(m.progress);
+        // getVa = m.progress;
+        console.log(m);
+        //console.log("get"+getVa );
+      }
+    }
+  }
+});
+
+export default {
+  head: {
+    script: [{ src: "https://widget.cloudinary.com/v2.0/global/all.js" }]
+  },
+  data: () => ({
+    uploadED: false,
+    values: 0,
+    jsonData: {},
+    imgUrl: null,
+    stdId: {},
+    test: /\s\d{8}\s/
+  }),
+  computed: {
+    // showData: () => {
+    //   util.data;
+    // }
+  },
+
+  name: "app",
+  methods: {
+    myCloudinary() {
+      const myWidget = cloudinary.createUploadWidget(
+        {
+          cloudName: "new4761",
+          uploadPreset: "ijr8okwl",
+          sources: ["local", "url", "camera"],
+          multiple: false,
+          maxFiles: 1,
+          clientAllowedFormats: ["png", "gif", "jpeg"]
+        },
+        (error, result) => {
+          if (!error && result && result.event === "success") {
+            console.log();
+            this.uploadED = true;
+            this.imgUrl = result.info.secure_url;
+            // console.log(public_id);
+            console.log("Done! Here is the image info: ", result.info);
+          }
+        }
+      );
+      return myWidget;
+    },
+    openWidget() {
+      const widget = this.myCloudinary();
+      widget.open();
+    },
+    showData() {
+      this.values = util.getValue();
+      for (; false; ) {
+        this.showData();
+      }
+    },
+    async recognizeID() {
+      const img = document.getElementById("text-img");
+      //console.log(img.progress);
+      //
+      await worker.load();
+      await worker.loadLanguage("eng");
+      await worker.initialize("eng", OEM_TESSERACT_LSTM_COMBINED);
+      await worker.setParameters({
+        tessedit_pageseg_mode: PSM_RAW_LINE
+        // preserve_interword_spaces: "1"
+        // tessedit_char_whitelist:'0123456789',
+      });
+      const {
+        data: { text }
+      } = await worker.recognize(img);
+      console.log(text);
+      const re = /\s\d{8}\s/;
+      let Data = {};
+      let find2 = {};
+      if (text.match(re) == null) {
+        this.jsonData = text;
+        this.stdId = {};
+      } else {
+        Data = text.match(re);
+        this.jsonData = text;
+        if (Data[0].match(re2) === null) this.stdId = {};
+        else {
+          find2 = Data[0].match(re2);
+          this.stdId = find2;
+        }
+      }
+      // if(Data!=null)
+      // this.jsonData = text;
+      // else this.jsonData ={};
+      console.log(Data);
+
+      // if (Data[0].match(re2) === null) this.stdId = {};
+      // else {
+      //   find2 = Data[0].match(re2);
+      //   this.stdId = find2;
+      // }
+
+      // if(find2!=null)
+      // this.stdId = find2;
+      // else this.stdId ={};
+      // this.stdId = find2;
+      console.log(find2);
+      await this.showData();
+      //.progress(progress => console.log('progress', progress))
+    },
+    async recognizeData() {
+      const img = document.getElementById("text-img");
+      //console.log(img.progress);
+      //
+      await worker.load();
+      await worker.loadLanguage("eng");
+      await worker.initialize("eng", OEM_TESSERACT_LSTM_COMBINED);
+      await worker.setParameters({
+        tessedit_pageseg_mode: PSM_RAW_LINE
+        // preserve_interword_spaces: "1"
+        // tessedit_char_whitelist:'0123456789',
+      });
+      const {
+        data: { text }
+      } = await worker.recognize(img);
+      console.log(text);
+      this.jsonData = text;
+      // const re = /\s\d{8}\s/;
+      // let Data = {};
+      // let find2={};
+      // if (text.match(re) == null) {
+      //   this.jsonData =text;
+      //   this.stdId ={};
+
+      // } else {
+      //   Data = text.match(re);
+      //   this.jsonData = text;
+      //       if (Data[0].match(re2) === null) this.stdId = {};
+      //   else {
+      //     find2 = Data[0].match(re2);
+      //     this.stdId = find2;
+      //   }
+      // }
+      // // if(Data!=null)
+      // // this.jsonData = text;
+      // // else this.jsonData ={};
+      // console.log(Data);
+
+      // // if (Data[0].match(re2) === null) this.stdId = {};
+      // // else {
+      // //   find2 = Data[0].match(re2);
+      // //   this.stdId = find2;
+      // // }
+
+      // // if(find2!=null)
+      // // this.stdId = find2;
+      // // else this.stdId ={};
+      // // this.stdId = find2;
+      // console.log(find2);
+      await this.showData();
+      //.progress(progress => console.log('progress', progress))
+    }
+  }
+};
+</script>
+
+<style>
+#app {
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+}
+</style>
