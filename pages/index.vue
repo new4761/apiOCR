@@ -47,7 +47,7 @@
              v-if="!clicked"
             :disabled="!uploadED"
             block
-            v-on:click="recognizeID&&(clicked=true)"
+            v-on:click="recognizeID"
           >สเเกนรหัสนักศึกษา</b-button>
         </b-col>
         <b-col md="6" sm="12">
@@ -58,7 +58,7 @@
             size="lg"
             block
             :disabled="!uploadED"
-            v-on:click="recognizeData&&(clicked=true)"
+            v-on:click="recognizeData"
           >สเเกนข้อมูลบัตรทั้งหมด</b-button>
         </b-col>
         <!-- <b-col>
@@ -169,6 +169,7 @@ export default {
     //   }
     // },
     async recognizeID() {
+      clicked=true;
       const img = document.getElementById("text-img");
       //console.log(img.progress);
       //
@@ -221,6 +222,7 @@ export default {
       //.progress(progress => console.log('progress', progress))
     },
     async recognizeData() {
+       clicked=true;
       const img = document.getElementById("text-img");
       //console.log(img.progress);
       //
