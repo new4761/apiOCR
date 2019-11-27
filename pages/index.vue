@@ -21,6 +21,7 @@
               src="~/assets/img/default.png"
             />
             <b-img
+            fluid
               id="text-img"
               class="mx-auto"
               style="max-height:550px;"
