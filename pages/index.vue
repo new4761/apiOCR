@@ -1,6 +1,13 @@
 <template>
   <b-container class="pt-3 px-5">
+
     <b-card style="border-style: none;">
+
+      <h1 class="text-center">Kmitl OCR  </h1>
+      <h5 class="text-center">เว็บสำหรับโปรเจคประจำวิชา Artificial intelligence ประจำปีการศึกษา 2019</h5>
+      <p
+        class="text-center text-muted"
+      >****** กรุณาคลิกที่ภาพเพื่ออัพโหลดรูปภาพ (รับเฉพาะ ภาพเเนวตั้งเเละ นามสกุลไฟล์คือ png , jpg , gif) *******</p>
       <b-row no-gutters class="justify-content-center">
         <b-col md="auto" sm="12">
           <a href=" #">
@@ -54,20 +61,18 @@
         </b-col>-->
       </b-row>
     </b-card>
-    <b-card v-if="uploadED">
-      <div>
-        <b-tabs content-class="mt-3" fill pills>
-          <b-tab title="ข้อมูลทั้งหมดที่สเเกนได้" active>
-            <p>{{jsonData}}</p>
-          </b-tab>
-          <b-tab title="รหัสนักศึกษา">
-            <p>I'm the second tab</p>
-          </b-tab>
-          <b-tab title="Very, very long title">
-            <p>{{stdId}}</p>
-          </b-tab>
-        </b-tabs>
-      </div>
+    <b-card v-if="uploadED&&showRaw" class="p-2">
+      <h3>ข้อมูลทั้งหมดที่สเเกนได้</h3>
+      <br />
+      <p>{{jsonData}}</p>
+    </b-card>
+    <b-card v-if="uploadED&&showStd" class="p-2">
+      <h3>รหัสนักศึกษา</h3>
+      <br />
+      <p>{{stdId}}</p>
+      <!-- <nuxt-link :to="'/api/ocr/'+stdId"> -->
+        <b-button pill>Get Json api</b-button>
+      <!-- </nuxt-link> -->
     </b-card>
   </b-container>
 </template>
@@ -108,6 +113,9 @@ export default {
     script: [{ src: "https://widget.cloudinary.com/v2.0/global/all.js" }]
   },
   data: () => ({
+    showRaw: false,
+
+    showStd: false,
     uploadED: false,
     values: 0,
     jsonData: {},
@@ -171,14 +179,16 @@ export default {
         data: { text }
       } = await worker.recognize(img);
       console.log(text);
+      this.showStd = true;
       const re = /\s\d{8}\s/;
       let Data = {};
       let find2 = {};
-      if (text.match(re) == null) {
+      if (text.match(re) === null) {
         this.jsonData = text;
-        this.stdId = {};
+        this.stdId = "ไม่เจอข้อมูล";
       } else {
         Data = text.match(re);
+        const re2 = /\d{8}/;
         this.jsonData = text;
         if (Data[0].match(re2) === null) this.stdId = {};
         else {
@@ -220,6 +230,7 @@ export default {
       const {
         data: { text }
       } = await worker.recognize(img);
+      this.showRaw = true;
       console.log(text);
       this.jsonData = text;
       // const re = /\s\d{8}\s/;
