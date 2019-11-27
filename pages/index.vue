@@ -4,6 +4,7 @@
     <b-card style="border-style: none;">
 
       <h1 class="text-center">Kmitl OCR  </h1>
+      {{showData}}
       <h5 class="text-center">เว็บสำหรับโปรเจคประจำวิชา Artificial intelligence ประจำปีการศึกษา 2019</h5>
       <p
         class="text-center text-muted"
@@ -35,6 +36,7 @@
         </b-col>
       </b-row>
       <br />
+      <h3 class="text-center text-muted" v-if="clicked">กำลังดำเนินการ!!!</h3>
       <b-progress block :value="values" :max="1" show-progress></b-progress>
       <br />
       <b-row>
@@ -42,19 +44,21 @@
           <b-button
             variant="success"
             size="lg"
+             v-if="!clicked"
             :disabled="!uploadED"
             block
-            v-on:click="recognizeID"
+            v-on:click="recognizeID&&(clicked=true)"
           >สเเกนรหัสนักศึกษา</b-button>
         </b-col>
         <b-col md="6" sm="12">
           <b-button
+           v-if="!clicked"
             class
             variant="info"
             size="lg"
             block
             :disabled="!uploadED"
-            v-on:click="recognizeData"
+            v-on:click="recognizeData&&(clicked=true)"
           >สเเกนข้อมูลบัตรทั้งหมด</b-button>
         </b-col>
         <!-- <b-col>
@@ -115,7 +119,7 @@ export default {
   },
   data: () => ({
     showRaw: false,
-
+ clicked:false,
     showStd: false,
     uploadED: false,
     values: 0,
@@ -125,9 +129,9 @@ export default {
     test: /\s\d{8}\s/
   }),
   computed: {
-    // showData: () => {
-    //   util.data;
-    // }
+ showData: () => {
+     return  util.data;
+        }
   },
 
   name: "app",
@@ -158,12 +162,12 @@ export default {
       const widget = this.myCloudinary();
       widget.open();
     },
-    showData() {
-      this.values = util.getValue();
-      for (; false; ) {
-        this.showData();
-      }
-    },
+    // showData() {
+    //   this.values = util.getValue();
+    //   for (; false; ) {
+    //     this.showData();
+    //   }
+    // },
     async recognizeID() {
       const img = document.getElementById("text-img");
       //console.log(img.progress);
