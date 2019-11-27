@@ -169,7 +169,7 @@ export default {
     //   }
     // },
     async recognizeID() {
-      clicked=true;
+      this.clicked=true;
       const img = document.getElementById("text-img");
       //console.log(img.progress);
       //
@@ -222,7 +222,7 @@ export default {
       //.progress(progress => console.log('progress', progress))
     },
     async recognizeData() {
-       clicked=true;
+        this.clicked=true;
       const img = document.getElementById("text-img");
       //console.log(img.progress);
       //
