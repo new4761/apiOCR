@@ -3,8 +3,8 @@
 
     <b-card style="border-style: none;">
 
-      <h1 class="text-center">Kmitl OCR  </h1>
-      {{showData}}
+      <h1 class="text-center">Kmitl OCR</h1>
+      <!-- {{showData}} -->
       <h5 class="text-center">เว็บสำหรับโปรเจคประจำวิชา Artificial intelligence ประจำปีการศึกษา 2019</h5>
       <p
         class="text-center text-muted"
