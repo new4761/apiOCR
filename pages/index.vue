@@ -1,8 +1,6 @@
 <template>
   <b-container class="pt-3 px-5">
-
     <b-card style="border-style: none;">
-
       <h1 class="text-center">Kmitl OCR</h1>
       <!-- {{showData}} -->
       <h5 class="text-center">เว็บสำหรับโปรเจคประจำวิชา Artificial intelligence ประจำปีการศึกษา 2019</h5>
@@ -22,7 +20,7 @@
               src="~/assets/img/default.png"
             />
             <b-img
-            fluid
+              fluid
               id="text-img"
               class="mx-auto"
               style="max-height:550px;"
@@ -36,48 +34,33 @@
         </b-col>
       </b-row>
       <br />
-      <h3 class="text-center text-muted" v-if="clicked">กำลังดำเนินการ!!!</h3>
-      <b-progress block :value="values" :max="1" show-progress></b-progress>
+      <small class="text-center text-muted" id="target2" v-if="clicked">กำลังดำเนินการ!!!</small>
+      <div class="progress">
+        <div id="target1" class="progress-bar" role="progressbar"></div>
+      </div>
       <br />
       <b-row>
-        <b-col md="6" sm="12" class="mb-sm-2">
-          <b-button
-            variant="success"
-            size="lg"
-             v-if="!clicked"
-            :disabled="!uploadED"
-            block
-            v-on:click="recognizeID"
-          >สเเกนรหัสนักศึกษา</b-button>
-        </b-col>
-        <b-col md="6" sm="12">
-          <b-button
-           v-if="!clicked"
-            class
-            variant="info"
-            size="lg"
-            block
-            :disabled="!uploadED"
-            v-on:click="recognizeData"
-          >สเเกนข้อมูลบัตรทั้งหมด</b-button>
-        </b-col>
+        <b-button
+          variant="success"
+          size="lg"
+          v-if="!clicked"
+          :disabled="!uploadED"
+          block
+          v-on:click="recognizeID"
+        >สเเกนรหัสนักศึกษา</b-button>
         <!-- <b-col>
           <b-button  variant="warning" size="lg" block v-on:click="recognizeID">สเเกนรหัสนักศึกษา</b-button>
         </b-col>-->
       </b-row>
     </b-card>
-    <b-card v-if="uploadED&&showRaw" class="p-2">
+    <!-- <b-card v-if="uploadED&&showRaw" class="">
       <h3>ข้อมูลทั้งหมดที่สเเกนได้</h3>
       <br />
       <p>{{jsonData}}</p>
-    </b-card>
-    <b-card v-if="uploadED&&showStd" class="p-2">
-      <h3>รหัสนักศึกษา</h3>
-      <br />
-      <p>{{stdId}}</p>
-      <!-- <nuxt-link :to="'/api/ocr/'+stdId"> -->
-        <b-button pill>Get Json api</b-button>
-      <!-- </nuxt-link> -->
+    </b-card> -->
+    <b-card v-if="uploadED&&showStd" class=" text-center" no-body>
+      <h3 class="text-muted">รหัสนักศึกษา</h3>
+      <h1>{{stdId}}</h1>
     </b-card>
   </b-container>
 </template>
@@ -98,16 +81,24 @@ import {
   PSM_AUTO_OSD,
   PSM_SPARSE_TEXT_OSD
 } from "tesseract.js";
-import util from "~/controller/ocr";
+import util from "~/modal/ocr";
 let getVa = 0;
 const worker = createWorker({
   logger: m => {
     {
       {
-        util.setValue(m.progress);
-        // getVa = m.progress;
+        // util.setValue(m.progress);
+        if (m.status === "recognizing text") {
+          document.getElementById("target1").style.width =
+            (m.progress * 100).toString() + "%";
+          if (m.progress * 100 === 100) {
+            document.getElementById("target2").innerHTML =
+              "สเเกนรหัสนักศึกษาเสร็จสิ้น";
+          }
+          // showData();
+          // getVa = m.progress;
+        } //console.log("get"+getVa );
         console.log(m);
-        //console.log("get"+getVa );
       }
     }
   }
@@ -119,7 +110,7 @@ export default {
   },
   data: () => ({
     showRaw: false,
- clicked:false,
+    clicked: false,
     showStd: false,
     uploadED: false,
     values: 0,
@@ -129,9 +120,9 @@ export default {
     test: /\s\d{8}\s/
   }),
   computed: {
- showData: () => {
-     return  util.data;
-        }
+    //  showData: () => {
+    //      return  util.data;
+    //         }
   },
 
   name: "app",
@@ -162,14 +153,11 @@ export default {
       const widget = this.myCloudinary();
       widget.open();
     },
-    // showData() {
-    //   this.values = util.getValue();
-    //   for (; false; ) {
-    //     this.showData();
-    //   }
-    // },
+    showData: function() {
+      this.values = util.getValue();
+    },
     async recognizeID() {
-      this.clicked=true;
+      this.clicked = true;
       const img = document.getElementById("text-img");
       //console.log(img.progress);
       //
@@ -191,7 +179,7 @@ export default {
       let find2 = {};
       if (text.match(re) === null) {
         this.jsonData = text;
-        this.stdId = "ไม่เจอข้อมูล";
+        this.stdId = "ไม่เจอข้อมูลรหัสนักศึกษา";
       } else {
         Data = text.match(re);
         const re2 = /\d{8}/;
@@ -199,7 +187,7 @@ export default {
         if (Data[0].match(re2) === null) this.stdId = {};
         else {
           find2 = Data[0].match(re2);
-          this.stdId = find2;
+          this.stdId = find2[0];
         }
       }
       // if(Data!=null)
@@ -222,7 +210,7 @@ export default {
       //.progress(progress => console.log('progress', progress))
     },
     async recognizeData() {
-        this.clicked=true;
+      this.clicked = true;
       const img = document.getElementById("text-img");
       //console.log(img.progress);
       //
@@ -240,52 +228,9 @@ export default {
       this.showRaw = true;
       console.log(text);
       this.jsonData = text;
-      // const re = /\s\d{8}\s/;
-      // let Data = {};
-      // let find2={};
-      // if (text.match(re) == null) {
-      //   this.jsonData =text;
-      //   this.stdId ={};
 
-      // } else {
-      //   Data = text.match(re);
-      //   this.jsonData = text;
-      //       if (Data[0].match(re2) === null) this.stdId = {};
-      //   else {
-      //     find2 = Data[0].match(re2);
-      //     this.stdId = find2;
-      //   }
-      // }
-      // // if(Data!=null)
-      // // this.jsonData = text;
-      // // else this.jsonData ={};
-      // console.log(Data);
-
-      // // if (Data[0].match(re2) === null) this.stdId = {};
-      // // else {
-      // //   find2 = Data[0].match(re2);
-      // //   this.stdId = find2;
-      // // }
-
-      // // if(find2!=null)
-      // // this.stdId = find2;
-      // // else this.stdId ={};
-      // // this.stdId = find2;
-      // console.log(find2);
       await this.showData();
-      //.progress(progress => console.log('progress', progress))
     }
   }
 };
 </script>
-
-<style>
-#app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
